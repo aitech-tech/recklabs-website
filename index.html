@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>ReckLabs AI MCP Platform — Connect Claude to Your Business</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f0f13;--surface:#1a1a24;--surface2:#24243a;
+      --accent:#7c6aff;--accent2:#a78bfa;
+      --text:#e8e8f0;--muted:#8888a8;
+      --green:#34d399;--yellow:#fbbf24;--red:#f87171;
+      --border:#2e2e48;--radius:12px;
+    }
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         background:var(--bg);color:var(--text);line-height:1.6}
+    a{color:var(--accent2);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* ---- NAV ---- */
+    nav{display:flex;align-items:center;justify-content:space-between;
+        padding:1rem 2rem;border-bottom:1px solid var(--border);
+        position:sticky;top:0;background:var(--bg);z-index:100}
+    .logo{font-weight:900;font-size:1.3rem;color:var(--accent2);letter-spacing:-0.5px}
+    .logo span{color:var(--muted);font-weight:400}
+    nav ul{list-style:none;display:flex;gap:2rem}
+    nav ul a{color:var(--muted);font-size:0.9rem}
+    nav ul a:hover{color:var(--text)}
+    .nav-cta{background:var(--accent);color:#fff !important;
+             padding:0.45rem 1.2rem;border-radius:8px;font-weight:700;font-size:0.85rem}
+    .nav-cta:hover{background:var(--accent2);text-decoration:none !important}
+
+    /* ---- HERO ---- */
+    .hero{text-align:center;padding:6rem 2rem 5rem;max-width:860px;margin:0 auto}
+    .badge{display:inline-block;background:var(--surface2);border:1px solid var(--border);
+           color:var(--accent2);padding:0.3rem 1rem;border-radius:100px;
+           font-size:0.78rem;font-weight:700;letter-spacing:0.5px;margin-bottom:1.5rem}
+    .hero h1{font-size:clamp(2rem,5.5vw,3.6rem);font-weight:900;line-height:1.1;
+             letter-spacing:-1.5px;margin-bottom:1.2rem}
+    .hero h1 span{color:var(--accent2)}
+    .hero p{font-size:1.15rem;color:var(--muted);max-width:580px;margin:0 auto 2.5rem}
+    .btn-group{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+    .btn{display:inline-block;padding:0.9rem 2.2rem;border-radius:var(--radius);
+         font-weight:700;font-size:1rem;cursor:pointer;transition:opacity .15s}
+    .btn:hover{opacity:.88;text-decoration:none}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+    .hero-note{margin-top:1.5rem;font-size:0.82rem;color:var(--muted)}
+
+    /* ---- STATS ---- */
+    .stats{display:flex;justify-content:center;gap:3rem;
+           padding:3rem 2rem;border-top:1px solid var(--border);
+           border-bottom:1px solid var(--border);flex-wrap:wrap}
+    .stat{text-align:center}
+    .stat-num{font-size:2rem;font-weight:900;color:var(--accent2)}
+    .stat-label{font-size:0.85rem;color:var(--muted);margin-top:0.2rem}
+
+    /* ---- SECTIONS ---- */
+    section{padding:5rem 2rem;max-width:1100px;margin:0 auto}
+    .section-label{color:var(--accent2);font-size:0.78rem;font-weight:700;
+                   letter-spacing:1px;text-transform:uppercase;margin-bottom:0.8rem}
+    h2{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;letter-spacing:-0.5px;
+       margin-bottom:1rem;line-height:1.2}
+    .subtitle{color:var(--muted);font-size:1rem;max-width:560px;margin-bottom:3rem}
+
+    /* ---- HOW IT WORKS ---- */
+    .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem}
+    .step{background:var(--surface);border:1px solid var(--border);
+          border-radius:var(--radius);padding:1.5rem;position:relative}
+    .step-num{width:32px;height:32px;border-radius:50%;background:var(--accent);
+              color:#fff;font-weight:800;font-size:0.9rem;
+              display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+    .step h3{font-size:1rem;font-weight:700;margin-bottom:0.5rem}
+    .step p{font-size:0.85rem;color:var(--muted)}
+
+    /* ---- CONNECTOR LIBRARY ---- */
+    .category-filter{display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:2rem}
+    .cat-btn{background:var(--surface);border:1px solid var(--border);
+             color:var(--muted);padding:0.4rem 1rem;border-radius:100px;
+             font-size:0.82rem;cursor:pointer;transition:all .15s}
+    .cat-btn:hover,.cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    .connectors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem}
+    .connector-card{background:var(--surface);border:1px solid var(--border);
+                    border-radius:var(--radius);padding:1.2rem;cursor:default;
+                    transition:border-color .15s}
+    .connector-card:hover{border-color:var(--accent)}
+    .cc-head{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem}
+    .cc-icon{font-size:1.6rem}
+    .cc-name{font-weight:700;font-size:0.95rem}
+    .cc-cat{font-size:0.75rem;color:var(--muted)}
+    .cc-desc{font-size:0.82rem;color:var(--muted);margin-bottom:0.8rem}
+    .cc-foot{display:flex;justify-content:space-between;align-items:center}
+    .status-badge{padding:0.18rem 0.6rem;border-radius:100px;font-size:0.72rem;font-weight:700}
+    .status-available{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+    .status-coming_soon{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
+    .status-planned{background:rgba(136,136,168,.15);color:var(--muted);border:1px solid rgba(136,136,168,.2)}
+
+    /* ---- SKILL FILE SYSTEM ---- */
+    .layers{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem}
+    .layer-card{border-radius:var(--radius);padding:1.5rem;border:1px solid var(--border)}
+    .layer-card.base{background:linear-gradient(135deg,rgba(124,106,255,.15),rgba(124,106,255,.05));
+                     border-color:rgba(124,106,255,.3)}
+    .layer-card.client{background:linear-gradient(135deg,rgba(52,211,153,.1),rgba(52,211,153,.03));
+                       border-color:rgba(52,211,153,.2)}
+    .layer-card.merged{background:var(--surface2)}
+    .layer-num{font-size:0.75rem;font-weight:700;letter-spacing:1px;
+               text-transform:uppercase;margin-bottom:0.5rem;color:var(--accent2)}
+    .layer-card h3{font-size:1rem;font-weight:700;margin-bottom:0.5rem}
+    .layer-card p{font-size:0.83rem;color:var(--muted)}
+    .layer-tag{display:inline-block;margin-top:0.8rem;padding:0.2rem 0.6rem;
+               border-radius:4px;font-size:0.72rem;font-weight:700;background:var(--surface)}
+
+    /* ---- PRICING ---- */
+    .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.5rem}
+    .plan-card{background:var(--surface);border:1px solid var(--border);
+               border-radius:var(--radius);padding:1.8rem;position:relative}
+    .plan-card.popular{border-color:var(--accent);background:linear-gradient(135deg,rgba(124,106,255,.12),var(--surface))}
+    .popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+                   background:var(--accent);color:#fff;padding:0.2rem 1rem;
+                   border-radius:100px;font-size:0.73rem;font-weight:700}
+    .plan-name{font-size:1.1rem;font-weight:800;margin-bottom:0.3rem}
+    .plan-price{font-size:2rem;font-weight:900;color:var(--accent2);margin:0.8rem 0 0.3rem}
+    .plan-price span{font-size:1rem;font-weight:400;color:var(--muted)}
+    .plan-desc{font-size:0.83rem;color:var(--muted);margin-bottom:1.2rem}
+    .plan-features{list-style:none;margin-bottom:1.5rem}
+    .plan-features li{font-size:0.85rem;padding:0.3rem 0;color:var(--muted);
+                      display:flex;align-items:flex-start;gap:0.5rem}
+    .plan-features li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0}
+    .plan-btn{display:block;text-align:center;padding:0.75rem;border-radius:8px;
+              font-weight:700;font-size:0.9rem;background:var(--surface2);
+              border:1px solid var(--border);color:var(--text)}
+    .plan-card.popular .plan-btn{background:var(--accent);border-color:var(--accent);color:#fff}
+
+    /* ---- SECURITY ---- */
+    .security-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+    .sec-card{background:var(--surface);border:1px solid var(--border);
+              border-radius:var(--radius);padding:1.5rem}
+    .sec-icon{font-size:2rem;margin-bottom:0.8rem}
+    .sec-card h3{font-size:1rem;font-weight:700;margin-bottom:0.5rem}
+    .sec-card p{font-size:0.83rem;color:var(--muted)}
+
+    /* ---- DOWNLOAD ---- */
+    .download-box{background:linear-gradient(135deg,rgba(124,106,255,.2),rgba(124,106,255,.05));
+                  border:1px solid rgba(124,106,255,.3);border-radius:var(--radius);
+                  padding:3rem 2rem;text-align:center;max-width:700px;margin:0 auto}
+    .download-box h2{font-size:2rem;margin-bottom:1rem}
+    .download-box p{color:var(--muted);margin-bottom:2rem}
+    .req-list{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;
+              margin-top:1.5rem;font-size:0.82rem;color:var(--muted)}
+    .req-list span::before{content:"✓ ";color:var(--green)}
+
+    /* ---- FOOTER ---- */
+    footer{border-top:1px solid var(--border);padding:3rem 2rem;
+           display:flex;justify-content:space-between;align-items:center;
+           flex-wrap:wrap;gap:1rem;max-width:1100px;margin:0 auto}
+    .footer-logo{font-weight:900;color:var(--accent2)}
+    .footer-links{display:flex;gap:1.5rem}
+    .footer-links a{color:var(--muted);font-size:0.85rem}
+    .footer-copy{color:var(--muted);font-size:0.82rem;width:100%;text-align:center;
+                 padding-top:1rem;border-top:1px solid var(--border);margin-top:1rem}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">RECK<span>LABS</span></div>
+  <ul>
+    <li><a href="#connectors">Connectors</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#security">Security</a></li>
+    <li><a href="#download">Download</a></li>
+  </ul>
+  <a href="#download" class="nav-cta">Get Started Free</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">Phase 1 — Foundation Release · Open Source MCP Platform</div>
+  <h1>Connect <span>Claude</span> to Your Business Apps</h1>
+  <p>ReckLabs AI Agent bridges Claude Desktop to the tools your business already uses — Zoho CRM, QuickBooks, Gmail, and more. Zero technical setup required.</p>
+  <div class="btn-group">
+    <a href="#download" class="btn btn-primary">Download Free</a>
+    <a href="#connectors" class="btn btn-secondary">View Connectors</a>
+  </div>
+  <p class="hero-note">Works with Claude Desktop for Windows · No cloud subscription required · Your data stays on your machine</p>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">14+</div><div class="stat-label">Connectors in Library</div></div>
+  <div class="stat"><div class="stat-num">5</div><div class="stat-label">Categories</div></div>
+  <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Local Data Processing</div></div>
+  <div class="stat"><div class="stat-num">Free</div><div class="stat-label">To Start</div></div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="section-label">How It Works</div>
+  <h2>Setup in 5 minutes, use forever</h2>
+  <p class="subtitle">The Red Hat model for AI — open-source tools, professionally packaged. You own your data and your setup.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Download Installer</h3>
+      <p>One-click Windows installer. Python and Claude Desktop are the only prerequisites.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Add Your Credentials</h3>
+      <p>Open <code>config/connectors.json</code> and paste your API keys. They never leave your machine.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Restart Claude Desktop</h3>
+      <p>The MCP server starts automatically. You'll see ReckLabs tools appear in Claude Desktop.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Authenticate</h3>
+      <p>Ask Claude: "Authenticate with Zoho." A browser window opens for OAuth — one time only.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <h3>Talk to Your Data</h3>
+      <p>"Show me my recent leads." "Run the pipeline review." Claude does the rest.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONNECTOR LIBRARY -->
+<section id="connectors">
+  <div class="section-label">Connector Library</div>
+  <h2>Connect the tools you already use</h2>
+  <p class="subtitle">Curated, tested, and versioned connectors. We maintain stable forks so they never break when upstream changes.</p>
+
+  <div class="category-filter">
+    <button class="cat-btn active" onclick="filterCat('all',this)">All</button>
+    <button class="cat-btn" onclick="filterCat('CRM',this)">CRM</button>
+    <button class="cat-btn" onclick="filterCat('Accounting & Finance',this)">Accounting</button>
+    <button class="cat-btn" onclick="filterCat('Lead Generation',this)">Lead Gen</button>
+    <button class="cat-btn" onclick="filterCat('Communication',this)">Communication</button>
+    <button class="cat-btn" onclick="filterCat('Productivity',this)">Productivity</button>
+  </div>
+
+  <div class="connectors-grid" id="connectors-grid">
+    <!-- CRM -->
+    <div class="connector-card" data-cat="CRM">
+      <div class="cc-head"><div class="cc-icon">🏢</div><div><div class="cc-name">Zoho CRM</div><div class="cc-cat">CRM</div></div></div>
+      <div class="cc-desc">Full Zoho CRM integration — leads, contacts, accounts, search.</div>
+      <div class="cc-foot"><span class="status-badge status-available">Available</span><span style="font-size:.75rem;color:var(--muted)">Free+</span></div>
+    </div>
+    <div class="connector-card" data-cat="CRM">
+      <div class="cc-head"><div class="cc-icon">🟠</div><div><div class="cc-name">HubSpot</div><div class="cc-cat">CRM</div></div></div>
+      <div class="cc-desc">HubSpot CRM — contacts, deals, and pipelines.</div>
+      <div class="cc-foot"><span class="status-badge status-coming_soon">Coming Soon</span><span style="font-size:.75rem;color:var(--muted)">Starter+</span></div>
+    </div>
+    <div class="connector-card" data-cat="CRM">
+      <div class="cc-head"><div class="cc-icon">☁️</div><div><div class="cc-name">Salesforce</div><div class="cc-cat">CRM</div></div></div>
+      <div class="cc-desc">Salesforce CRM — leads, opportunities, accounts.</div>
+      <div class="cc-foot"><span class="status-badge status-coming_soon">Coming Soon</span><span style="font-size:.75rem;color:var(--muted)">Pro+</span></div>
+    </div>
+    <!-- Accounting -->
+    <div class="connector-card" data-cat="Accounting & Finance">
+      <div class="cc-head"><div class="cc-icon">📊</div><div><div class="cc-name">QuickBooks</div><div class="cc-cat">Accounting & Finance</div></div></div>
+      <div class="cc-desc">QuickBooks Online — invoices, expenses, financial reports.</div>
+      <div class="cc-foot"><span class="status-badge status-coming_soon">Coming Soon</span><span style="font-size:.75rem;color:var(--muted)">Starter+</span></div>
+    </div>
+    <div class="connector-card" data-cat="Accounting & Finance">
+      <div class="cc-head"><div class="cc-icon">📒</div><div><div class="cc-name">Tally</div><div class="cc-cat">Accounting & Finance</div></div></div>
+      <div class="cc-desc">Tally ERP 9 / Tally Prime — Indian accounting, GST, invoices.</div>
+      <div class="cc-foot"><span class="status-badge status-planned">Planned</span><span style="font-size:.75rem;color:var(--muted)">Starter+</span></div>
+    </div>
+    <div class="connector-card" data-cat="Accounting & Finance">
+      <div class="cc-head"><div class="cc-icon">📚</div><div><div class="cc-name">Zoho Books</div><div class="cc-cat">Accounting & Finance</div></div></div>
+      <div class="cc-desc">Zoho Books — invoicing, expenses, GST compliance.</div>
+      <div class="cc-foot"><span class="status-badge status-planned">Planned</span><span style="font-size:.75rem;color:var(--muted)">Starter+</span></div>
+    </div>
+    <!-- Lead Gen -->
+    <div class="connector-card" data-cat="Lead Generation">
+      <div class="cc-head"><div class="cc-icon">🎯</div><div><div class="cc-name">Apollo.io</div><div class="cc-cat">Lead Generation</div></div></div>
+      <div class="cc-desc">Apollo.io — prospect search, lead enrichment, email sequences.</div>
+      <div class="cc-foot"><span class="status-badge status-coming_soon">Coming Soon</span><span style="font-size:.75rem;color:var(--muted)">Pro+</span></div>
+    </div>
+    <div class="connector-card" data-cat="Lead Generation">
+      <div class="cc-head"><div class="cc-icon">🔍</div><div><div class="cc-name">Lusha</div><div class="cc-cat">Lead Generation</div></div></div>
+      <div class="cc-desc">Lusha — B2B contact data enrichment at scale.</div>
+      <div class="cc-foot"><span class="status-badge status-planned">Planned</span><span style="font-size:.75rem;color:var(--muted)">Pro+</span></div>
+    </div>
+    <div class="connector-card" data-cat="Lead Generation">
+      <div class="cc-head"><div class="cc-icon">🏹</div><div><div class="cc-name">Hunter.io</div><div class="cc-cat">Lead Generation</div></div></div>
+      <div class="cc-desc">Hunter.io — email finder and domain-level verification.</div>
+      <div class="cc-foot"><span class="status-badge status-planned">Planned</span><span style="font-size:.75rem;color:var(--muted)">Starter+</span></div>
+    </div>
+    <!-- Communication -->
+    <div class="connector-card" data-cat="Communication">
+      <div class="cc-head"><div class="cc-icon">📧</div><div><div class="cc-name">Gmail</div><div class="cc-cat">Communication</div></div></div>
+      <div class="cc-desc">Gmail — read, compose, and send emails via natural language.</div>
+      <div class="cc-foot"><span class="status-badge status-coming_soon">Coming Soon</span><span style="font-size:.75rem;color:var(--muted)">Starter+</span></div>
+    </div>
+    <div class="connector-card" data-cat="Communication">
+      <div class="cc-head"><div class="cc-icon">📨</div><div><div class="cc-name">Outlook</div><div class="cc-cat">Communication</div></div></div>
+      <div class="cc-desc">Microsoft Outlook — emails, calendar, and contacts.</div>
+      <div class="cc-foot"><span class="status-badge status-planned">Planned</span><span style="font-size:.75rem;color:var(--muted)">Pro+</span></div>
+    </div>
+    <div class="connector-card" data-cat="Communication">
+      <div class="cc-head"><div class="cc-icon">💬</div><div><div class="cc-name">Slack</div><div class="cc-cat">Communication</div></div></div>
+      <div class="cc-desc">Slack — send messages, read channels, manage notifications.</div>
+      <div class="cc-foot"><span class="status-badge status-planned">Planned</span><span style="font-size:.75rem;color:var(--muted)">Pro+</span></div>
+    </div>
+    <!-- Productivity -->
+    <div class="connector-card" data-cat="Productivity">
+      <div class="cc-head"><div class="cc-icon">📁</div><div><div class="cc-name">Google Drive</div><div class="cc-cat">Productivity</div></div></div>
+      <div class="cc-desc">Google Drive — read, create, and organize files and folders.</div>
+      <div class="cc-foot"><span class="status-badge status-coming_soon">Coming Soon</span><span style="font-size:.75rem;color:var(--muted)">Starter+</span></div>
+    </div>
+    <div class="connector-card" data-cat="Productivity">
+      <div class="cc-head"><div class="cc-icon">📝</div><div><div class="cc-name">Notion</div><div class="cc-cat">Productivity</div></div></div>
+      <div class="cc-desc">Notion — databases, pages, and collaborative workspaces.</div>
+      <div class="cc-foot"><span class="status-badge status-planned">Planned</span><span style="font-size:.75rem;color:var(--muted)">Pro+</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILL FILE SYSTEM -->
+<section id="skills">
+  <div class="section-label">Skill File System</div>
+  <h2>Pre-built workflows. Your customisation on top.</h2>
+  <p class="subtitle">Our curated skill files encode years of business process expertise. You add your credentials and preferences. The MCP server merges both at runtime.</p>
+  <div class="layers">
+    <div class="layer-card base">
+      <div class="layer-num">Layer 1 — Base Skills</div>
+      <h3>Platform-Curated Workflows</h3>
+      <p>Best-practice workflows, optimal API sequences, industry-specific defaults, and error-handling patterns built from real client use cases.</p>
+      <span class="layer-tag" style="color:var(--accent2)">🔒 AES-256 Encrypted · Our IP</span>
+    </div>
+    <div class="layer-card client">
+      <div class="layer-num">Layer 2 — Client Layer</div>
+      <h3>Your Customisation</h3>
+      <p>Your API credentials, custom parameters, workflow overrides, and business-specific values. Always readable and editable by you.</p>
+      <span class="layer-tag" style="color:var(--green)">✏️ Plain JSON · Fully Editable</span>
+    </div>
+    <div class="layer-card merged">
+      <div class="layer-num">Runtime Merge</div>
+      <h3>Auto-Merged by MCP Server</h3>
+      <p>At execution time, the MCP server merges both layers. Your overrides apply on top of our defaults. Updates replace only the base layer — your settings are always preserved.</p>
+      <span class="layer-tag" style="color:var(--muted)">⚡ Runtime Only · No Manual Steps</span>
+    </div>
+    <div class="layer-card" style="background:var(--surface);border-color:var(--border)">
+      <div class="layer-num">Layer 4 — Subscription Updates</div>
+      <h3>Skill Files Get Smarter</h3>
+      <p>Monthly updates push improved base skill files as connectors evolve. The strongest justification for the subscription — continuous value, not a one-time setup.</p>
+      <span class="layer-tag" style="color:var(--yellow)">🔄 Auto-Updated · Subscription</span>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-label">Pricing</div>
+  <h2>Start free. Scale as you grow.</h2>
+  <p class="subtitle">No cloud costs for compute — everything runs locally on your machine. You only pay for the connector library and skill files.</p>
+  <div class="pricing-grid">
+    <div class="plan-card">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">₹0<span>/month</span></div>
+      <div class="plan-desc">Perfect for freelancers and micro-businesses trying it out.</div>
+      <ul class="plan-features">
+        <li>1 connector</li>
+        <li>3 skills</li>
+        <li>Basic skill files</li>
+        <li>Community support</li>
+        <li>Zoho CRM included</li>
+      </ul>
+      <a href="#download" class="plan-btn">Download Free</a>
+    </div>
+    <div class="plan-card popular">
+      <div class="popular-badge">Most Popular</div>
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">₹999<span>/month</span></div>
+      <div class="plan-desc">For SMBs and freelancers who need multiple connectors.</div>
+      <ul class="plan-features">
+        <li>Up to 3 connectors</li>
+        <li>10 skills</li>
+        <li>Skill file updates</li>
+        <li>Email support</li>
+        <li>Zoho CRM + 2 more</li>
+      </ul>
+      <a href="#download" class="plan-btn">Get Started</a>
+    </div>
+    <div class="plan-card">
+      <div class="plan-name">Professional</div>
+      <div class="plan-price">₹2,999<span>/month</span></div>
+      <div class="plan-desc">For CA firms, sales teams, and growing businesses.</div>
+      <ul class="plan-features">
+        <li>Up to 10 connectors</li>
+        <li>50 skills</li>
+        <li>Workflow builder</li>
+        <li>Priority support</li>
+        <li>Skill file updates</li>
+        <li>Industry packs</li>
+      </ul>
+      <a href="#download" class="plan-btn">Get Professional</a>
+    </div>
+    <div class="plan-card">
+      <div class="plan-name">Enterprise</div>
+      <div class="plan-price">Custom</div>
+      <div class="plan-desc">For large businesses needing unlimited connectors and SLA.</div>
+      <ul class="plan-features">
+        <li>Unlimited connectors</li>
+        <li>Custom connectors</li>
+        <li>Fine-tuning service</li>
+        <li>White label</li>
+        <li>SLA guarantee</li>
+        <li>Dedicated support</li>
+      </ul>
+      <a href="mailto:hello@recklabs.com" class="plan-btn">Contact Sales</a>
+    </div>
+  </div>
+</section>
+
+<!-- SECURITY -->
+<section id="security">
+  <div class="section-label">Security & Privacy</div>
+  <h2>Your data never leaves your machine</h2>
+  <p class="subtitle">Local-first architecture means full compliance with DPDP Act 2023, CERT-In Directions 2022, and IT Act Section 43A — by design, not by configuration.</p>
+  <div class="security-grid">
+    <div class="sec-card">
+      <div class="sec-icon">🔒</div>
+      <h3>Local-First Architecture</h3>
+      <p>The MCP server runs entirely on your Windows machine. API keys and business data never pass through Recklabs servers. We only validate your license key.</p>
+    </div>
+    <div class="sec-card">
+      <div class="sec-icon">🛡️</div>
+      <h3>AES-256 Skill Encryption</h3>
+      <p>Base skill files are encrypted with AES-256 before distribution. Only your licensed MCP server runtime can decrypt and execute them.</p>
+    </div>
+    <div class="sec-card">
+      <div class="sec-icon">📋</div>
+      <h3>DPDP Act 2023 Compliant</h3>
+      <p>Data minimisation by design. Purpose limitation per connector. No aggregation on our servers. Credential-never-logged policy throughout.</p>
+    </div>
+    <div class="sec-card">
+      <div class="sec-icon">🏗️</div>
+      <h3>CERT-In Ready</h3>
+      <p>Local-first architecture means CERT-In log retention obligations apply only to our operational servers — not to the financial and CRM data flowing through your connectors.</p>
+    </div>
+    <div class="sec-card">
+      <div class="sec-icon">🔄</div>
+      <h3>OAuth2 Token Management</h3>
+      <p>Industry-standard OAuth2 with automatic token refresh. Tokens stored locally in encrypted storage. No passwords stored anywhere.</p>
+    </div>
+    <div class="sec-card">
+      <div class="sec-icon">⚡</div>
+      <h3>Works Offline</h3>
+      <p>Once authenticated, connectors work without internet dependency for supported operations. Your daily workflow is never blocked by our servers going down.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section id="download">
+  <div class="download-box">
+    <div class="badge">Windows · Free Download · v1.0.0</div>
+    <h2>Start in 5 minutes</h2>
+    <p>Download, run the installer, restart Claude Desktop. No credentials to enter — just log in to your Zoho account when prompted.</p>
+    <div class="btn-group">
+      <a href="https://github.com/aitech-tech/ai-agent/releases/download/v1.0.0/recklabs-ai-agent-v1.0.0.zip" class="btn btn-primary" download>Download v1.0.0</a>
+      <a href="https://github.com/aitech-tech/ai-agent" class="btn btn-secondary">View on GitHub</a>
+    </div>
+    <div class="req-list">
+      <span>Windows 10 / 11</span>
+      <span>Python 3.10+</span>
+      <span>Claude Desktop (free)</span>
+      <span>Internet for OAuth login only</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">RECKLABS <span style="color:var(--muted);font-weight:400;font-size:.85rem">Services Pvt. Ltd.</span></div>
+  <div class="footer-links">
+    <a href="#">Docs</a>
+    <a href="https://github.com/aitech-tech/ai-agent">GitHub</a>
+    <a href="#">Privacy Policy</a>
+    <a href="mailto:hello@recklabs.com">Contact</a>
+  </div>
+  <div class="footer-copy">
+    © 2026 Recklabs Services Private Limited · CP-202, Saraswati Vihar, Pitampura, New Delhi — 110034 · Your ROI Partner
+  </div>
+</footer>
+
+<script>
+  function filterCat(cat, btn) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.connector-card').forEach(card => {
+      if (cat === 'all' || card.dataset.cat === cat) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+</script>
+</body>
+</html>
