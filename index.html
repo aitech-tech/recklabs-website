@@ -140,15 +140,33 @@
     .sec-card h3{font-size:1rem;font-weight:700;margin-bottom:0.5rem}
     .sec-card p{font-size:0.83rem;color:var(--muted)}
 
-    /* ---- DOWNLOAD ---- */
-    .download-box{background:linear-gradient(135deg,rgba(124,106,255,.2),rgba(124,106,255,.05));
-                  border:1px solid rgba(124,106,255,.3);border-radius:var(--radius);
-                  padding:3rem 2rem;text-align:center;max-width:700px;margin:0 auto}
-    .download-box h2{font-size:2rem;margin-bottom:1rem}
-    .download-box p{color:var(--muted);margin-bottom:2rem}
+    /* ---- SETUP / DOWNLOAD ---- */
+    .setup-steps{display:flex;flex-direction:column;gap:2rem;max-width:820px;margin:0 auto}
+    .setup-step{background:var(--surface);border:1px solid var(--border);
+                border-radius:var(--radius);padding:1.8rem}
+    .setup-step-head{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.2rem}
+    .setup-step-head .step-num{flex-shrink:0;margin-bottom:0}
+    .setup-step-head h3{font-size:1.05rem;font-weight:700;margin-bottom:0.2rem}
+    .setup-step-head p{font-size:0.84rem;color:var(--muted);margin:0}
+    .connector-select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0.8rem}
+    .sel-card{border:2px solid var(--border);border-radius:10px;padding:1rem;
+              cursor:pointer;transition:border-color .15s,background .15s;position:relative}
+    .sel-card:hover:not(.disabled){border-color:var(--accent)}
+    .sel-card.selected{border-color:var(--accent);background:rgba(124,106,255,.08)}
+    .sel-card.disabled{opacity:.5;cursor:not-allowed}
+    .sel-card input[type=checkbox]{position:absolute;top:0.8rem;right:0.8rem;
+                                    width:16px;height:16px;accent-color:var(--accent)}
+    .sel-icon{font-size:1.5rem;margin-bottom:0.4rem}
+    .sel-name{font-weight:700;font-size:0.9rem;margin-bottom:0.2rem}
+    .sel-desc{font-size:0.78rem;color:var(--muted)}
+    .sel-foot{margin-top:0.6rem}
+    .step-actions{display:flex;gap:1rem;flex-wrap:wrap;align-items:center}
     .req-list{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;
-              margin-top:1.5rem;font-size:0.82rem;color:var(--muted)}
+              margin-top:2rem;font-size:0.82rem;color:var(--muted)}
     .req-list span::before{content:"✓ ";color:var(--green)}
+    .config-note{margin-top:1rem;font-size:0.82rem;color:var(--muted);
+                 background:var(--surface2);border-radius:8px;padding:0.8rem 1rem;display:none}
+    .config-note.visible{display:block}
 
     /* ---- FOOTER ---- */
     footer{border-top:1px solid var(--border);padding:3rem 2rem;
@@ -204,13 +222,13 @@
   <div class="steps">
     <div class="step">
       <div class="step-num">1</div>
-      <h3>Download Installer</h3>
-      <p>One-click Windows installer. Python and Claude Desktop are the only prerequisites.</p>
+      <h3>Select Connectors</h3>
+      <p>Pick the tools your business uses on our website. We generate a personalised installer config.</p>
     </div>
     <div class="step">
       <div class="step-num">2</div>
-      <h3>Add Your Credentials</h3>
-      <p>Open <code>config/connectors.json</code> and paste your API keys. They never leave your machine.</p>
+      <h3>Download &amp; Run</h3>
+      <p>Download the config + base installer. Place both in the same folder and double-click install.bat.</p>
     </div>
     <div class="step">
       <div class="step-num">3</div>
@@ -460,22 +478,125 @@
   </div>
 </section>
 
-<!-- DOWNLOAD -->
+<!-- SETUP / DOWNLOAD -->
 <section id="download">
-  <div class="download-box">
-    <div class="badge">Windows · Free Download · v1.0.1</div>
-    <h2>Start in 5 minutes</h2>
-    <p>Download, run the installer, restart Claude Desktop. No credentials to enter — just log in to your Zoho account when prompted.</p>
-    <div class="btn-group">
-      <a href="https://github.com/aitech-tech/ai-agent/releases/download/v1.0.1/recklabs-ai-agent-v1.0.1.zip" class="btn btn-primary" download>Download v1.0.1</a>
-      <a href="https://github.com/aitech-tech/ai-agent" class="btn btn-secondary">View on GitHub</a>
+  <div class="section-label">Get Started</div>
+  <h2>Build Your Installer</h2>
+  <p class="subtitle">Select the connectors you need — we generate a personalised config. One install covers everything.</p>
+
+  <div class="setup-steps">
+
+    <!-- Step 1: Select Connectors -->
+    <div class="setup-step">
+      <div class="setup-step-head">
+        <div class="step-num">1</div>
+        <div>
+          <h3>Select your connectors</h3>
+          <p>Only available connectors can be selected. More are being added regularly.</p>
+        </div>
+      </div>
+      <div class="connector-select-grid">
+
+        <label class="sel-card selected" id="card-zoho" onclick="toggleConnector('zoho',this)">
+          <input type="checkbox" id="conn-zoho" value="zoho" checked>
+          <div class="sel-icon">🏢📚</div>
+          <div class="sel-name">Zoho CRM + Books</div>
+          <div class="sel-desc">Leads, contacts, accounts, invoices, bills. One OAuth login covers both.</div>
+          <div class="sel-foot"><span class="status-badge status-available">Available — Free</span></div>
+        </label>
+
+        <div class="sel-card disabled">
+          <div class="sel-icon">🟠</div>
+          <div class="sel-name">HubSpot</div>
+          <div class="sel-desc">CRM, contacts, deals, pipelines.</div>
+          <div class="sel-foot"><span class="status-badge status-coming_soon">Coming Soon</span></div>
+        </div>
+
+        <div class="sel-card disabled">
+          <div class="sel-icon">☁️</div>
+          <div class="sel-name">Salesforce</div>
+          <div class="sel-desc">Leads, opportunities, accounts.</div>
+          <div class="sel-foot"><span class="status-badge status-coming_soon">Coming Soon</span></div>
+        </div>
+
+        <div class="sel-card disabled">
+          <div class="sel-icon">📊</div>
+          <div class="sel-name">QuickBooks</div>
+          <div class="sel-desc">Invoices, expenses, reports.</div>
+          <div class="sel-foot"><span class="status-badge status-coming_soon">Coming Soon</span></div>
+        </div>
+
+        <div class="sel-card disabled">
+          <div class="sel-icon">📧</div>
+          <div class="sel-name">Gmail</div>
+          <div class="sel-desc">Read, compose, send emails.</div>
+          <div class="sel-foot"><span class="status-badge status-coming_soon">Coming Soon</span></div>
+        </div>
+
+        <div class="sel-card disabled">
+          <div class="sel-icon">💬</div>
+          <div class="sel-name">Slack</div>
+          <div class="sel-desc">Messages, channels, notifications.</div>
+          <div class="sel-foot"><span class="status-badge status-planned">Planned</span></div>
+        </div>
+
+      </div>
     </div>
-    <div class="req-list">
-      <span>Windows 10 / 11</span>
-      <span>Python 3.10+</span>
-      <span>Claude Desktop (free)</span>
-      <span>Internet for OAuth login only</span>
+
+    <!-- Step 2: Generate Config -->
+    <div class="setup-step">
+      <div class="setup-step-head">
+        <div class="step-num">2</div>
+        <div>
+          <h3>Generate your installer config</h3>
+          <p>Downloads a small <code>recklabs_config.json</code> personalised to your selection. Takes 1 second.</p>
+        </div>
+      </div>
+      <div class="step-actions">
+        <button class="btn btn-primary" onclick="generateConfig()">Generate Config File</button>
+      </div>
+      <div class="config-note" id="config-note">
+        Config downloaded. Now proceed to step 3.
+      </div>
     </div>
+
+    <!-- Step 3: Download Installer -->
+    <div class="setup-step">
+      <div class="setup-step-head">
+        <div class="step-num">3</div>
+        <div>
+          <h3>Download base installer</h3>
+          <p>The full ReckLabs AI Agent package — all connector code, skills, and the one-click installer.</p>
+        </div>
+      </div>
+      <div class="step-actions">
+        <a href="https://github.com/aitech-tech/ai-agent/releases/download/v1.0.1/recklabs-ai-agent-v1.0.1.zip"
+           class="btn btn-secondary" download>Download v1.0.1 (.zip)</a>
+        <a href="https://github.com/aitech-tech/ai-agent" class="btn btn-secondary" style="font-size:.85rem">View on GitHub</a>
+      </div>
+    </div>
+
+    <!-- Step 4: Run Installer -->
+    <div class="setup-step">
+      <div class="setup-step-head">
+        <div class="step-num">4</div>
+        <div>
+          <h3>Run the installer</h3>
+          <p>Extract the zip. Place <code>recklabs_config.json</code> next to <code>installer\install.bat</code>. Double-click <code>install.bat</code>.</p>
+        </div>
+      </div>
+      <div style="font-size:.84rem;color:var(--muted);line-height:1.8">
+        The installer will: install Python dependencies · configure your selected connectors · write Claude Desktop MCP config · optionally activate your license key.
+      </div>
+    </div>
+
+  </div><!-- /setup-steps -->
+
+  <div class="req-list">
+    <span>Windows 10 / 11</span>
+    <span>Python 3.10+</span>
+    <span>Claude Desktop (free)</span>
+    <span>Internet for OAuth only</span>
   </div>
 </section>
 
@@ -494,16 +615,50 @@
 </footer>
 
 <script>
+  /* ---- Connector library filter ---- */
   function filterCat(cat, btn) {
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('.connector-card').forEach(card => {
-      if (cat === 'all' || card.dataset.cat === cat) {
-        card.style.display = '';
-      } else {
-        card.style.display = 'none';
-      }
+      card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
     });
+  }
+
+  /* ---- Connector selection (setup section) ---- */
+  function toggleConnector(id, card) {
+    if (card.classList.contains('disabled')) return;
+    const cb = card.querySelector('input[type=checkbox]');
+    cb.checked = !cb.checked;
+    card.classList.toggle('selected', cb.checked);
+  }
+
+  /* ---- Generate personalised installer config ---- */
+  function generateConfig() {
+    const selected = [];
+    document.querySelectorAll('.sel-card:not(.disabled) input[type=checkbox]:checked').forEach(cb => {
+      selected.push(cb.value);
+    });
+    if (selected.length === 0) {
+      alert('Please select at least one connector before generating your config.');
+      return;
+    }
+    const config = {
+      selected_connectors: selected,
+      generated_at: new Date().toISOString().split('T')[0],
+      version: '1.0.1'
+    };
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'recklabs_config.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const note = document.getElementById('config-note');
+    note.textContent = 'Config downloaded: recklabs_config.json (connectors: ' + selected.join(', ') + '). Proceed to step 3.';
+    note.classList.add('visible');
   }
 </script>
 </body>
