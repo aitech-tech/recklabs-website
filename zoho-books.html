@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Zoho Books Connector — ReckLabs AI Agent</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0f0f13;--surface:#1a1a24;--surface2:#24243a;
+      --accent:#7c6aff;--accent2:#a78bfa;
+      --text:#e8e8f0;--muted:#8888a8;
+      --green:#34d399;--yellow:#fbbf24;--red:#f87171;
+      --border:#2e2e48;--radius:12px;
+    }
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         background:var(--bg);color:var(--text);line-height:1.7;font-size:15px}
+    a{color:var(--accent2);text-decoration:none}
+    a:hover{text-decoration:underline}
+    code{background:var(--surface2);border:1px solid var(--border);
+         padding:.15em .4em;border-radius:4px;font-size:.88em;font-family:'Cascadia Code','Fira Code',monospace}
+    pre{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);
+        padding:1.2rem;overflow-x:auto;font-size:.85rem;line-height:1.6}
+    pre code{background:none;border:none;padding:0;font-size:1em}
+
+    /* NAV */
+    nav{display:flex;align-items:center;justify-content:space-between;
+        padding:1rem 2rem;border-bottom:1px solid var(--border);
+        position:sticky;top:0;background:var(--bg);z-index:100}
+    .logo{font-weight:900;font-size:1.2rem;color:var(--accent2);letter-spacing:-.5px}
+    .logo span{color:var(--muted);font-weight:400}
+    .nav-back{color:var(--muted);font-size:.9rem}
+    .nav-back:hover{color:var(--text)}
+    .nav-cta{background:var(--accent);color:#fff !important;
+             padding:.4rem 1.1rem;border-radius:8px;font-weight:700;font-size:.85rem}
+
+    /* HERO */
+    .hero{padding:4rem 2rem 3rem;max-width:860px;margin:0 auto;text-align:center}
+    .badge{display:inline-block;background:var(--surface2);border:1px solid var(--border);
+           color:var(--green);padding:.25rem .9rem;border-radius:100px;
+           font-size:.75rem;font-weight:700;letter-spacing:.5px;margin-bottom:1.2rem}
+    .hero h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;letter-spacing:-1px;margin-bottom:.8rem}
+    .hero h1 span{color:var(--accent2)}
+    .hero p{color:var(--muted);font-size:1.05rem;max-width:560px;margin:0 auto 2rem}
+    .btn{display:inline-block;padding:.75rem 1.8rem;border-radius:var(--radius);
+         font-weight:700;font-size:.95rem}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);margin-left:.6rem}
+    .btn:hover{opacity:.88;text-decoration:none}
+
+    /* PAGE LAYOUT */
+    .page{display:grid;grid-template-columns:220px 1fr;gap:0;max-width:1200px;margin:0 auto}
+    @media(max-width:768px){.page{grid-template-columns:1fr}.sidebar{display:none}}
+
+    /* SIDEBAR */
+    .sidebar{padding:2rem 1rem 2rem 2rem;position:sticky;top:65px;height:calc(100vh - 65px);overflow-y:auto;border-right:1px solid var(--border)}
+    .sidebar ul{list-style:none}
+    .sidebar li{margin:.3rem 0}
+    .sidebar a{color:var(--muted);font-size:.85rem;display:block;padding:.2rem .5rem;border-radius:6px}
+    .sidebar a:hover{color:var(--text);background:var(--surface);text-decoration:none}
+    .sidebar .group-label{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+                          color:var(--accent2);margin:1.2rem 0 .3rem .5rem}
+
+    /* CONTENT */
+    .content{padding:2.5rem 2rem 4rem;min-width:0}
+    .content section{margin-bottom:3.5rem;scroll-margin-top:80px}
+    .content h2{font-size:1.5rem;font-weight:800;margin-bottom:1rem;letter-spacing:-.3px;
+                padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+    .content h3{font-size:1.05rem;font-weight:700;margin:1.5rem 0 .6rem;color:var(--accent2)}
+    .content p{color:var(--muted);margin-bottom:.8rem}
+    .content ul,ol{color:var(--muted);padding-left:1.4rem;margin-bottom:.8rem}
+    .content li{margin:.3rem 0}
+
+    /* TABLE */
+    .tbl-wrap{overflow-x:auto;margin-bottom:1.2rem}
+    table{width:100%;border-collapse:collapse;font-size:.85rem}
+    th{background:var(--surface2);color:var(--accent2);font-weight:700;
+       padding:.6rem .8rem;text-align:left;border:1px solid var(--border)}
+    td{padding:.5rem .8rem;border:1px solid var(--border);color:var(--muted)}
+    tr:hover td{background:var(--surface)}
+
+    /* STATUS BADGES */
+    .badge-green{display:inline-block;padding:.15rem .55rem;border-radius:100px;font-size:.72rem;font-weight:700;
+                 background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+    .badge-yellow{display:inline-block;padding:.15rem .55rem;border-radius:100px;font-size:.72rem;font-weight:700;
+                  background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
+    .badge-red{display:inline-block;padding:.15rem .55rem;border-radius:100px;font-size:.72rem;font-weight:700;
+               background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+
+    /* CARDS */
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1.2rem}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem}
+    .card-icon{font-size:1.6rem;margin-bottom:.6rem}
+    .card h4{font-size:.95rem;font-weight:700;margin-bottom:.4rem}
+    .card p{font-size:.82rem;color:var(--muted);margin:0}
+
+    /* STEPS */
+    .step-list{display:flex;flex-direction:column;gap:1rem}
+    .step-item{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);
+               border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem}
+    .step-num{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;
+              font-weight:800;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .step-body h4{font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+    .step-body p{font-size:.84rem;color:var(--muted);margin:0}
+
+    /* DO/DON'T */
+    .dodo-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+    @media(max-width:600px){.dodo-grid{grid-template-columns:1fr}}
+    .do-box,.dont-box{border-radius:var(--radius);padding:1.2rem}
+    .do-box{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2)}
+    .dont-box{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2)}
+    .do-box h4{color:var(--green);margin-bottom:.6rem}
+    .dont-box h4{color:var(--red);margin-bottom:.6rem}
+    .do-box li::marker{color:var(--green)}
+    .dont-box li::marker{color:var(--red)}
+
+    /* CALLOUT */
+    .callout{border-radius:var(--radius);padding:1rem 1.2rem;margin:1rem 0;font-size:.88rem}
+    .callout-warn{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);color:var(--yellow)}
+    .callout-info{background:rgba(124,106,255,.08);border:1px solid rgba(124,106,255,.25);color:var(--accent2)}
+
+    /* WORD SKILL SECTION */
+    .word-flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:1rem 0}
+    .word-node{background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+               padding:.5rem 1rem;font-size:.85rem;font-weight:600}
+    .word-arrow{color:var(--accent2);font-size:1.1rem;font-weight:700}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--border);padding:2rem;text-align:center;
+           color:var(--muted);font-size:.82rem}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">RECK<span>LABS</span></a>
+  <a href="index.html" class="nav-back">← Back to connectors</a>
+  <a href="index.html#download" class="nav-cta">Download Free</a>
+</nav>
+
+<div class="hero">
+  <div class="badge">Available — v1.2.0 · Direct API</div>
+  <h1>📚 <span>Zoho Books</span> Connector</h1>
+  <p>51 tools. 12 built-in skills. Indian GST defaults. Query and manage your Zoho Books data from Claude Desktop using plain language.</p>
+  <a href="index.html#download" class="btn btn-primary">Download Free</a>
+  <a href="#setup" class="btn btn-secondary">Setup Guide</a>
+</div>
+
+<div class="page">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <ul>
+    <li class="group-label">Overview</li>
+    <li><a href="#requirements">Machine Requirements</a></li>
+    <li><a href="#what-it-does">What It Does</a></li>
+    <li class="group-label">Setup</li>
+    <li><a href="#setup">Setup Guide</a></li>
+    <li><a href="#auth">Authentication</a></li>
+    <li class="group-label">Capabilities</li>
+    <li><a href="#tools">All 51 Tools</a></li>
+    <li><a href="#skills">Built-in Skills</a></li>
+    <li><a href="#custom-skills">Custom Word Skills</a></li>
+    <li><a href="#prompts">Example Prompts</a></li>
+    <li class="group-label">Reference</li>
+    <li><a href="#indian-defaults">Indian Defaults</a></li>
+    <li><a href="#limitations">Limitations</a></li>
+    <li><a href="#dodo">Dos &amp; Don'ts</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+  </ul>
+</nav>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- REQUIREMENTS -->
+<section id="requirements">
+  <h2>Machine Requirements</h2>
+  <div class="tbl-wrap">
+    <table>
+      <tr><th>Requirement</th><th>Minimum</th><th>Notes</th></tr>
+      <tr><td>Operating System</td><td>Windows 10 / 11</td><td>macOS and Linux also work — run <code>main.py</code> directly</td></tr>
+      <tr><td>Python</td><td>3.10 or higher</td><td><a href="https://python.org" target="_blank">python.org</a> — the installer auto-downloads if missing</td></tr>
+      <tr><td>Claude Desktop</td><td>Latest</td><td>Free plan works — <a href="https://claude.ai/download" target="_blank">claude.ai/download</a></td></tr>
+      <tr><td>Zoho Books account</td><td>Any plan</td><td>Free trial available at zoho.com/books</td></tr>
+      <tr><td>Internet</td><td>Required</td><td>For Zoho API calls and initial OAuth login</td></tr>
+      <tr><td>RAM</td><td>256 MB</td><td>Agent is lightweight — uses less than a browser tab</td></tr>
+      <tr><td>Disk</td><td>60 MB</td><td>Agent files + Python dependencies</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- WHAT IT DOES -->
+<section id="what-it-does">
+  <h2>What It Does</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">🧾</div>
+      <h4>Invoices</h4>
+      <p>List, create, update invoices. Filter by status (unpaid, overdue, draft). View per customer.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💸</div>
+      <h4>Expenses</h4>
+      <p>Record and review business expenses. Group by category. Flag overdue payables.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">👥</div>
+      <h4>Customers & Vendors</h4>
+      <p>Full contact management. Create customers and vendors. Flag incomplete records.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h4>Items & Products</h4>
+      <p>Create and manage products/services with GST rates. Indian GST treatment built in.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📋</div>
+      <h4>Orders & Estimates</h4>
+      <p>Sales orders, purchase orders, and estimates — full CRUD with status tracking.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <h4>Payments & Taxes</h4>
+      <p>Record payments received. Manage GST and TDS tax rates. Indian defaults: 18% GST, 10% TDS.</p>
+    </div>
+  </div>
+  <p>All 51 tools run directly against the Zoho Books REST API v3 (India endpoint: <code>zohoapis.in/books/v3</code>). No third-party intermediaries. Your data stays between Claude Desktop (on your machine) and Zoho's servers.</p>
+</section>
+
+<!-- SETUP -->
+<section id="setup">
+  <h2>Setup Guide</h2>
+  <div class="step-list">
+    <div class="step-item">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>Create a Zoho API App</h4>
+        <p>Go to <a href="https://api-console.zoho.in" target="_blank">api-console.zoho.in</a> → Add Client → Server-based Applications. Fill in:<br>
+        Homepage URL: <code>http://localhost</code><br>
+        Authorized Redirect URI: <code>http://localhost:8000/callback</code><br>
+        Copy the <strong>Client ID</strong> and <strong>Client Secret</strong>.</p>
+        <p style="margin-top:.5rem">Outside India? Use <a href="https://api-console.zoho.com" target="_blank">api-console.zoho.com</a> instead.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Create a <code>.env</code> File</h4>
+        <p>In the <code>ai-agent/</code> folder, create a file named <code>.env</code> and paste:</p>
+        <pre><code>ZOHO_CLIENT_ID=your_client_id_here
+ZOHO_CLIENT_SECRET=your_client_secret_here
+ZOHO_REDIRECT_URI=http://localhost:8000/callback</code></pre>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>Run the Installer</h4>
+        <p>Double-click <code>installer\install.bat</code>. It installs Python dependencies and registers the agent with Claude Desktop automatically.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h4>Restart Claude Desktop</h4>
+        <p>Fully quit Claude Desktop from the system tray (not just close the window), then reopen it. The agent's 66 tools will appear automatically.</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h4>Authenticate with Zoho</h4>
+        <p>In Claude Desktop, type: <code>Authenticate with Zoho Books</code>. A browser window opens — log in and click Accept. Done. You only authenticate once; tokens refresh automatically.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUTH -->
+<section id="auth">
+  <h2>How Authentication Works</h2>
+  <ol>
+    <li>Agent starts a temporary local server on port <code>8000</code></li>
+    <li>Zoho's authorization page opens in your browser</li>
+    <li>You log in and approve the permissions</li>
+    <li>Zoho sends an auth code to <code>localhost:8000/callback</code></li>
+    <li>Agent exchanges the code for access + refresh tokens</li>
+    <li>Tokens are saved to <code>storage/tokens.json</code> — local only, never transmitted</li>
+    <li>All future requests use saved tokens; refresh happens automatically on expiry</li>
+  </ol>
+  <div class="callout callout-info" style="margin-top:1rem">
+    <strong>Headless flow:</strong> If the browser doesn't open automatically, ask Claude: <em>"Give me the Zoho OAuth URL"</em>. Open it manually, approve, then paste the <code>code</code> parameter back to Claude.
+  </div>
+</section>
+
+<!-- TOOLS -->
+<section id="tools">
+  <h2>All 51 Tools</h2>
+  <p>All tools are named <code>zoho_books_*</code>. Organization ID resolves automatically.</p>
+
+  <h3>Authentication (2)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Tool</th><th>Description</th></tr>
+    <tr><td><code>zoho_books_authenticate</code></td><td>Start OAuth2 flow or check auth status</td></tr>
+    <tr><td><code>zoho_books_connection_status</code></td><td>Show connection, auth state, organization, Indian defaults</td></tr>
+  </table></div>
+
+  <h3>Organizations (2)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Tool</th><th>Description</th></tr>
+    <tr><td><code>zoho_books_list_organizations</code></td><td>List all Zoho Books organizations on this account</td></tr>
+    <tr><td><code>zoho_books_get_organization</code></td><td>Get details of a specific organization</td></tr>
+  </table></div>
+
+  <h3>Contacts — Customers &amp; Vendors (5)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Tool</th><th>Description</th><th>Required</th></tr>
+    <tr><td><code>zoho_books_list_contacts</code></td><td>List contacts (filter by customer/vendor)</td><td>—</td></tr>
+    <tr><td><code>zoho_books_get_contact</code></td><td>Get a contact by ID</td><td><code>contact_id</code></td></tr>
+    <tr><td><code>zoho_books_create_contact</code></td><td>Create a customer or vendor</td><td><code>contact_name</code>, <code>contact_type</code></td></tr>
+    <tr><td><code>zoho_books_update_contact</code></td><td>Update a contact</td><td><code>contact_id</code></td></tr>
+    <tr><td><code>zoho_books_delete_contact</code></td><td>Delete a contact</td><td><code>contact_id</code></td></tr>
+  </table></div>
+
+  <h3>Invoices (5)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Tool</th><th>Description</th><th>Required</th></tr>
+    <tr><td><code>zoho_books_list_invoices</code></td><td>List invoices — filter by status, date, customer</td><td>—</td></tr>
+    <tr><td><code>zoho_books_get_invoice</code></td><td>Get a specific invoice</td><td><code>invoice_id</code></td></tr>
+    <tr><td><code>zoho_books_create_invoice</code></td><td>Create an invoice with line items</td><td><code>customer_id</code>, <code>line_items</code></td></tr>
+    <tr><td><code>zoho_books_update_invoice</code></td><td>Update an invoice</td><td><code>invoice_id</code></td></tr>
+    <tr><td><code>zoho_books_delete_invoice</code></td><td>Delete a draft invoice (permanent)</td><td><code>invoice_id</code></td></tr>
+  </table></div>
+
+  <h3>Estimates · Sales Orders · Purchase Orders · Expenses · Items · Taxes · Payments (5 each)</h3>
+  <p>Each entity has the same 5-tool pattern: <code>list_</code>, <code>get_</code>, <code>create_</code>, <code>update_</code>, <code>delete_</code>. Total: 35 tools across 7 entities.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Entity</th><th>List tool</th><th>Create required params</th></tr>
+    <tr><td>Estimates</td><td><code>zoho_books_list_estimates</code></td><td><code>customer_id</code>, <code>line_items</code></td></tr>
+    <tr><td>Sales Orders</td><td><code>zoho_books_list_sales_orders</code></td><td><code>customer_id</code>, <code>line_items</code></td></tr>
+    <tr><td>Purchase Orders</td><td><code>zoho_books_list_purchase_orders</code></td><td><code>vendor_id</code>, <code>line_items</code></td></tr>
+    <tr><td>Expenses</td><td><code>zoho_books_list_expenses</code></td><td><code>account_id</code>, <code>amount</code></td></tr>
+    <tr><td>Items / Products</td><td><code>zoho_books_list_items</code></td><td><code>name</code>, <code>rate</code></td></tr>
+    <tr><td>Taxes</td><td><code>zoho_books_list_taxes</code></td><td><code>tax_name</code>, <code>tax_percentage</code></td></tr>
+    <tr><td>Customer Payments</td><td><code>zoho_books_list_customer_payments</code></td><td><code>customer_id</code>, <code>amount</code>, <code>payment_mode</code></td></tr>
+  </table></div>
+
+  <h3>Users (2)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Tool</th><th>Description</th></tr>
+    <tr><td><code>zoho_books_list_users</code></td><td>List users on the organization</td></tr>
+    <tr><td><code>zoho_books_get_user</code></td><td>Get a specific user</td></tr>
+  </table></div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <h2>Built-in Skills (12)</h2>
+  <p>Skills are multi-step workflows that Claude triggers from natural language. All 12 are pre-installed.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Skill ID</th><th>Trigger Phrases</th><th>What It Does</th></tr>
+    <tr><td><code>zoho_books.invoice_review</code></td><td>"show invoices", "invoice review", "unpaid invoices"</td><td>Fetches invoices and groups by status</td></tr>
+    <tr><td><code>zoho_books.expense_review</code></td><td>"show expenses", "expense review"</td><td>Fetches expenses and groups by category</td></tr>
+    <tr><td><code>zoho_books.customer_review</code></td><td>"customer review", "show customers"</td><td>Lists customers, flags incomplete records</td></tr>
+    <tr><td><code>zoho_books.vendor_review</code></td><td>"vendor review", "show vendors"</td><td>Lists vendors, flags incomplete records</td></tr>
+    <tr><td><code>zoho_books.tax_review</code></td><td>"tax review", "GST rates", "show taxes"</td><td>Lists all tax rates, highlights GST</td></tr>
+    <tr><td><code>zoho_books.sales_order_review</code></td><td>"sales orders", "sales order review"</td><td>Fetches sales orders, groups by status</td></tr>
+    <tr><td><code>zoho_books.purchase_order_review</code></td><td>"purchase orders", "PO review"</td><td>Fetches purchase orders, groups by status</td></tr>
+    <tr><td><code>zoho_books.estimate_review</code></td><td>"show estimates", "estimate review"</td><td>Fetches estimates, groups by status</td></tr>
+    <tr><td><code>zoho_books.payment_review</code></td><td>"payments received", "payment review"</td><td>Fetches payments and summarises totals</td></tr>
+    <tr><td><code>zoho_books.create_invoice</code></td><td>"create invoice", "raise invoice"</td><td>Creates an invoice with INR defaults</td></tr>
+    <tr><td><code>zoho_books.create_customer</code></td><td>"create customer", "add customer"</td><td>Creates a customer contact</td></tr>
+    <tr><td><code>zoho_books.create_item_with_gst</code></td><td>"create item", "add product"</td><td>Creates a product with GST details</td></tr>
+  </table></div>
+</section>
+
+<!-- CUSTOM WORD SKILLS -->
+<section id="custom-skills">
+  <h2>Custom Skills — Edit in Word</h2>
+  <p>You don't need to touch any JSON or code. Edit a Word document, ask Claude to import it — done.</p>
+
+  <div class="word-flow">
+    <div class="word-node">📄 Edit Word template</div>
+    <div class="word-arrow">→</div>
+    <div class="word-node">💬 Ask Claude to import</div>
+    <div class="word-arrow">→</div>
+    <div class="word-node">⚙️ Agent converts to JSON</div>
+    <div class="word-arrow">→</div>
+    <div class="word-node">✅ Skill ready to run</div>
+  </div>
+
+  <h3>Template Location</h3>
+  <pre><code>skills\client_docs\zoho_books\
+  ├── simple_skill_template.docx    ← for most users
+  └── advanced_skill_template.docx  ← for power users</code></pre>
+
+  <h3>Simple Template (Recommended)</h3>
+  <p>Fill in plain English sections — no tool names or JSON needed:</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Section</th><th>Example</th></tr>
+    <tr><td>Skill Name</td><td>My Overdue Invoice Report</td></tr>
+    <tr><td>When I Ask</td><td>show overdue invoices</td></tr>
+    <tr><td>What This Skill Should Do</td><td>Fetch all overdue invoices and group by customer</td></tr>
+    <tr><td>Use These Filters</td><td>Status: overdue, Limit: 50</td></tr>
+    <tr><td>Use These Business Rules</td><td>Flag invoices above ₹1,00,000</td></tr>
+    <tr><td>Approval Needed Before</td><td>No — this skill only reads data</td></tr>
+    <tr><td>Output Format</td><td>Group by customer name, show total due</td></tr>
+    <tr><td>Notes</td><td>Indian GST applies — verify with accountant</td></tr>
+  </table></div>
+
+  <h3>Supported Task Keywords</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>You write</th><th>Maps to</th></tr>
+    <tr><td>invoices / unpaid invoices / overdue invoices</td><td><code>zoho_books_list_invoices</code> (+ status filter)</td></tr>
+    <tr><td>expenses / bills / payables</td><td><code>zoho_books_list_expenses</code></td></tr>
+    <tr><td>customers</td><td><code>zoho_books_list_contacts</code> (contact_type: customer)</td></tr>
+    <tr><td>vendors / suppliers</td><td><code>zoho_books_list_contacts</code> (contact_type: vendor)</td></tr>
+    <tr><td>items / products / services</td><td><code>zoho_books_list_items</code></td></tr>
+    <tr><td>taxes / GST / TDS</td><td><code>zoho_books_list_taxes</code></td></tr>
+    <tr><td>estimates / quotes</td><td><code>zoho_books_list_estimates</code></td></tr>
+    <tr><td>sales orders</td><td><code>zoho_books_list_sales_orders</code></td></tr>
+    <tr><td>purchase orders / PO</td><td><code>zoho_books_list_purchase_orders</code></td></tr>
+    <tr><td>payments / receipts</td><td><code>zoho_books_list_customer_payments</code></td></tr>
+  </table></div>
+
+  <h3>Import Tools in Claude</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Tool</th><th>Purpose</th></tr>
+    <tr><td><code>list_skill_templates</code></td><td>Show available Word templates with friendly names</td></tr>
+    <tr><td><code>import_skill_from_word</code></td><td>Convert a .docx into validated client skill JSON</td></tr>
+    <tr><td><code>list_client_skills</code></td><td>Show all generated client skills</td></tr>
+    <tr><td><code>validate_client_skill</code></td><td>Validate a generated skill before running</td></tr>
+  </table></div>
+
+  <h3>Safety Rules Applied Automatically</h3>
+  <ul>
+    <li><strong>Delete tools are blocked</strong> in simple-format skills — you cannot accidentally delete data from Word</li>
+    <li><strong>Create / update / send actions</strong> are flagged <code>approval_required: true</code> — Claude will confirm before executing</li>
+    <li><strong>Generated JSON</strong> is saved to <code>skills/client/zoho_books/</code> — never included in the release zip, always stays on your machine</li>
+  </ul>
+
+  <h3>Advanced Template</h3>
+  <p>Power users can fill in a table with exact tool names, params (JSON), and on-error behaviour. The agent parses the table directly. Delete tools are still blocked automatically.</p>
+  <div class="callout callout-warn">
+    Generated skills are saved locally only. They are not backed up to Zoho or to ReckLabs. Keep your .docx templates — they are the source of truth.
+  </div>
+</section>
+
+<!-- EXAMPLE PROMPTS -->
+<section id="prompts">
+  <h2>Example Prompts</h2>
+  <div class="card-grid">
+    <div class="card">
+      <h4>Authentication</h4>
+      <p><code>Authenticate with Zoho Books</code><br><code>Check connection status</code></p>
+    </div>
+    <div class="card">
+      <h4>Invoices</h4>
+      <p><code>Show all unpaid invoices</code><br><code>Create an invoice for Acme Corp ₹50,000</code><br><code>Show overdue invoices</code></p>
+    </div>
+    <div class="card">
+      <h4>Expenses</h4>
+      <p><code>Show recent expenses</code><br><code>Review my bills</code><br><code>List overdue payables</code></p>
+    </div>
+    <div class="card">
+      <h4>Customers & Vendors</h4>
+      <p><code>Show all customers</code><br><code>Add a new customer: Tata Consultancy</code><br><code>Review vendor list</code></p>
+    </div>
+    <div class="card">
+      <h4>Items & Taxes</h4>
+      <p><code>Create item: Web Design ₹25,000 GST 18%</code><br><code>Show all tax rates</code><br><code>What GST rates do I have?</code></p>
+    </div>
+    <div class="card">
+      <h4>Custom Skills</h4>
+      <p><code>List skill templates</code><br><code>Import skill from Word — my_skill.docx</code><br><code>List my client skills</code></p>
+    </div>
+  </div>
+</section>
+
+<!-- INDIAN DEFAULTS -->
+<section id="indian-defaults">
+  <h2>Indian Defaults</h2>
+  <div class="tbl-wrap"><table>
+    <tr><th>Setting</th><th>Default</th><th>Notes</th></tr>
+    <tr><td>Currency</td><td>INR (₹)</td><td>Indian Rupees</td></tr>
+    <tr><td>Country</td><td>IN</td><td>India</td></tr>
+    <tr><td>Tax system</td><td>GST</td><td>Goods and Services Tax</td></tr>
+    <tr><td>Default GST rate</td><td>18%</td><td>Most goods and services</td></tr>
+    <tr><td>Default TDS rate</td><td>10%</td><td>TDS on professional services</td></tr>
+    <tr><td>GST treatment</td><td>business_gst</td><td>Registered business default</td></tr>
+    <tr><td>API endpoint</td><td>zohoapis.in</td><td>India data center</td></tr>
+  </table></div>
+  <div class="callout callout-warn">
+    <strong>Warning:</strong> These are demonstration defaults. GST rates, TDS applicability, and accounting treatment vary by transaction type and business category. Always verify with a qualified accountant before raising actual invoices or filing returns. The agent does not provide tax or accounting advice.
+  </div>
+</section>
+
+<!-- LIMITATIONS -->
+<section id="limitations">
+  <h2>Limitations</h2>
+  <ul>
+    <li><strong>Write operations are permanent.</strong> Deleted records cannot be recovered through Claude. Use Zoho Books' own UI for sensitive deletions.</li>
+    <li><strong>No bulk imports.</strong> Tools process one record at a time. For large data imports, use Zoho Books' CSV import feature directly.</li>
+    <li><strong>API rate limits.</strong> Zoho Books API has daily and per-minute request limits. Heavy use may result in temporary throttling (429 errors).</li>
+    <li><strong>No email sending.</strong> The agent can create and update records but cannot send invoices or documents by email on your behalf.</li>
+    <li><strong>Single organization by default.</strong> If you have multiple Zoho Books organizations, the agent uses the first one. Pass <code>organization_id</code> explicitly to target a specific org.</li>
+    <li><strong>No Zoho CRM in this build.</strong> This version is Zoho Books only. CRM support is coming soon.</li>
+    <li><strong>Custom skills: simple format is list-only.</strong> Simple Word skills only generate list/read operations. For create/update/delete, use the advanced template or the direct tools.</li>
+  </ul>
+</section>
+
+<!-- DOS AND DON'TS -->
+<section id="dodo">
+  <h2>Dos &amp; Don'ts</h2>
+  <div class="dodo-grid">
+    <div class="do-box">
+      <h4>✓ Do</h4>
+      <ul>
+        <li>Authenticate before running any data tools</li>
+        <li>Ask Claude to "list skills" to see what's available</li>
+        <li>Use "connection status" to verify before a session</li>
+        <li>Keep <code>.env</code> private — never share it or commit it to git</li>
+        <li>Use Word templates for custom skills — no JSON editing needed</li>
+        <li>Verify tax calculations with your accountant before filing</li>
+        <li>Check <code>storage/agent.log</code> if something isn't working</li>
+      </ul>
+    </div>
+    <div class="dont-box">
+      <h4>✗ Don't</h4>
+      <ul>
+        <li>Delete records through Claude unless absolutely certain — permanent</li>
+        <li>Share <code>storage/tokens.json</code> — it contains live API tokens</li>
+        <li>Use this agent for large data migrations or bulk imports</li>
+        <li>Assume tax calculations are accountant-verified</li>
+        <li>Commit <code>.env</code> or <code>tokens.json</code> to version control</li>
+        <li>Run create/update skills on production data without testing</li>
+        <li>Use the agent as a substitute for your accountant's advice</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- TROUBLESHOOTING -->
+<section id="troubleshooting">
+  <h2>Troubleshooting</h2>
+  <div class="tbl-wrap"><table>
+    <tr><th>Problem</th><th>Fix</th></tr>
+    <tr><td>Tools not visible in Claude</td><td>Quit Claude Desktop from system tray, reopen. Check <code>storage/agent.log</code> for startup errors.</td></tr>
+    <tr><td>"Authentication required"</td><td>Ask Claude: <em>Authenticate with Zoho Books</em></td></tr>
+    <tr><td>401 after previously working</td><td>Delete contents of <code>storage/tokens.json</code> (replace with <code>{}</code>), re-authenticate</td></tr>
+    <tr><td>Browser doesn't open for auth</td><td>Ask Claude for the Zoho OAuth URL, open manually, paste the code back</td></tr>
+    <tr><td>Port 8000 in use</td><td>Close the conflicting app or set <code>ZOHO_REDIRECT_URI</code> to another port and update Zoho API Console</td></tr>
+    <tr><td>Import skill from Word fails</td><td>Ensure the file is a .docx (not .doc). Check it has at least a Skill Name section.</td></tr>
+    <tr><td>Python not found</td><td>Install Python 3.10+ from python.org, then re-run <code>install.bat</code></td></tr>
+    <tr><td>pip install fails</td><td>Run <code>pip install -r requirements.txt</code> in the <code>ai-agent/</code> folder</td></tr>
+  </table></div>
+  <p>Logs are at <code>storage/agent.log</code>. To watch in real time (Windows PowerShell):</p>
+  <pre><code>Get-Content storage\agent.log -Wait -Tail 50</code></pre>
+</section>
+
+</div><!-- /content -->
+</div><!-- /page -->
+
+<footer>
+  © 2026 Recklabs Services Private Limited · CP-202, Saraswati Vihar, Pitampura, New Delhi – 110034 ·
+  <a href="index.html">Home</a> · <a href="mailto:hello@recklabs.com">Contact</a>
+</footer>
+
+</body>
+</html>
