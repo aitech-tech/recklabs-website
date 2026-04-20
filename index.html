@@ -196,9 +196,9 @@
 
 <!-- HERO -->
 <div class="hero">
-  <div class="badge">Phase 1 — Foundation Release · Open Source MCP Platform</div>
-  <h1>Connect <span>Claude</span> to Your Business Apps</h1>
-  <p>ReckLabs AI Agent bridges Claude Desktop to the tools your business already uses — Zoho CRM, QuickBooks, Gmail, and more. Zero technical setup required.</p>
+  <div class="badge">v1.2.0 — Zoho Books · Open Source MCP Platform</div>
+  <h1>Connect <span>Claude</span> to Zoho Books</h1>
+  <p>ReckLabs AI Agent bridges Claude Desktop to your Zoho Books accounting data — invoices, expenses, customers, taxes, and more. Indian GST defaults built in. Zero technical setup required.</p>
   <div class="btn-group">
     <a href="#download" class="btn btn-primary">Download Free</a>
     <a href="#connectors" class="btn btn-secondary">View Connectors</a>
@@ -208,8 +208,8 @@
 
 <!-- STATS -->
 <div class="stats">
-  <div class="stat"><div class="stat-num">14+</div><div class="stat-label">Connectors in Library</div></div>
-  <div class="stat"><div class="stat-num">5</div><div class="stat-label">Categories</div></div>
+  <div class="stat"><div class="stat-num">51</div><div class="stat-label">Zoho Books Tools</div></div>
+  <div class="stat"><div class="stat-num">12</div><div class="stat-label">Built-in Skills</div></div>
   <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Local Data Processing</div></div>
   <div class="stat"><div class="stat-num">Free</div><div class="stat-label">To Start</div></div>
 </div>
@@ -243,7 +243,7 @@
     <div class="step">
       <div class="step-num">5</div>
       <h3>Talk to Your Data</h3>
-      <p>"Show me my recent leads." "Run the pipeline review." Claude does the rest.</p>
+      <p>"Show me unpaid invoices." "Create an invoice for ₹50,000." Claude does the rest.</p>
     </div>
   </div>
 </section>
@@ -268,7 +268,7 @@
     <div class="connector-card" data-cat="CRM">
       <div class="cc-head"><div class="cc-icon">🏢</div><div><div class="cc-name">Zoho CRM</div><div class="cc-cat">CRM</div></div></div>
       <div class="cc-desc">Full Zoho CRM — leads, contacts, accounts, deals, search. One-click OAuth.</div>
-      <div class="cc-foot"><span class="status-badge status-available">Available</span><span style="font-size:.75rem;color:var(--muted)">Free+</span></div>
+      <div class="cc-foot"><span class="status-badge status-coming_soon">Coming Soon</span><span style="font-size:.75rem;color:var(--muted)">Free+</span></div>
     </div>
     <div class="connector-card" data-cat="CRM">
       <div class="cc-head"><div class="cc-icon">🟠</div><div><div class="cc-name">HubSpot</div><div class="cc-cat">CRM</div></div></div>
@@ -293,8 +293,8 @@
     </div>
     <div class="connector-card" data-cat="Accounting & Finance">
       <div class="cc-head"><div class="cc-icon">📚</div><div><div class="cc-name">Zoho Books</div><div class="cc-cat">Accounting & Finance</div></div></div>
-      <div class="cc-desc">Invoices, bills, customers, vendors. Shared OAuth with Zoho CRM — one login covers both.</div>
-      <div class="cc-foot"><span class="status-badge status-available">Available</span><span style="font-size:.75rem;color:var(--muted)">Free+</span></div>
+      <div class="cc-desc">51 tools — invoices, expenses, customers, vendors, items, taxes, payments. Indian GST defaults. Direct API, no intermediaries.</div>
+      <div class="cc-foot"><span class="status-badge status-available">Available — v1.2.0</span><span style="font-size:.75rem;color:var(--muted)">Free+</span></div>
     </div>
     <!-- Lead Gen -->
     <div class="connector-card" data-cat="Lead Generation">
@@ -390,7 +390,7 @@
         <li>3 skills</li>
         <li>Basic skill files</li>
         <li>Community support</li>
-        <li>Zoho CRM included</li>
+        <li>Zoho Books included</li>
       </ul>
       <a href="#download" class="plan-btn">Download Free</a>
     </div>
@@ -404,7 +404,7 @@
         <li>10 skills</li>
         <li>Skill file updates</li>
         <li>Email support</li>
-        <li>Zoho CRM + 2 more</li>
+        <li>Zoho Books + 2 more</li>
       </ul>
       <a href="#download" class="plan-btn">Get Started</a>
     </div>
@@ -497,13 +497,20 @@
       </div>
       <div class="connector-select-grid">
 
-        <label class="sel-card selected" id="card-zoho" onclick="toggleConnector('zoho',this)">
-          <input type="checkbox" id="conn-zoho" value="zoho" checked>
-          <div class="sel-icon">🏢📚</div>
-          <div class="sel-name">Zoho CRM + Books</div>
-          <div class="sel-desc">Leads, contacts, accounts, invoices, bills. One OAuth login covers both.</div>
-          <div class="sel-foot"><span class="status-badge status-available">Available — Free</span></div>
+        <label class="sel-card selected" id="card-zoho_books" onclick="toggleConnector('zoho_books',this)">
+          <input type="checkbox" id="conn-zoho_books" value="zoho_books" checked>
+          <div class="sel-icon">📚</div>
+          <div class="sel-name">Zoho Books</div>
+          <div class="sel-desc">51 tools — invoices, expenses, customers, vendors, taxes, payments. Indian GST built in.</div>
+          <div class="sel-foot"><span class="status-badge status-available">Available — v1.2.0 · Free</span></div>
         </label>
+
+        <div class="sel-card disabled">
+          <div class="sel-icon">🏢</div>
+          <div class="sel-name">Zoho CRM</div>
+          <div class="sel-desc">Leads, contacts, accounts, deals.</div>
+          <div class="sel-foot"><span class="status-badge status-coming_soon">Coming Soon</span></div>
+        </div>
 
         <div class="sel-card disabled">
           <div class="sel-icon">🟠</div>
@@ -570,8 +577,8 @@
         </div>
       </div>
       <div class="step-actions">
-        <a href="https://github.com/aitech-tech/ai-agent/releases/download/v1.0.1/recklabs-ai-agent-v1.0.1.zip"
-           class="btn btn-secondary" download>Download v1.0.1 (.zip)</a>
+        <a href="https://github.com/aitech-tech/ai-agent/releases/download/v1.2.0/recklabs-ai-agent-v1.2.0.zip"
+           class="btn btn-secondary" download>Download v1.2.0 (.zip)</a>
         <a href="https://github.com/aitech-tech/ai-agent" class="btn btn-secondary" style="font-size:.85rem">View on GitHub</a>
       </div>
     </div>
@@ -645,7 +652,7 @@
     const config = {
       selected_connectors: selected,
       generated_at: new Date().toISOString().split('T')[0],
-      version: '1.0.1'
+      version: '1.2.0'
     };
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
