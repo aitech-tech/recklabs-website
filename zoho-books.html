@@ -235,40 +235,19 @@
     <div class="step-item">
       <div class="step-num">1</div>
       <div class="step-body">
-        <h4>Create a Zoho API App</h4>
-        <p>Go to <a href="https://api-console.zoho.in" target="_blank">api-console.zoho.in</a> → Add Client → Server-based Applications. Fill in:<br>
-        Homepage URL: <code>http://localhost</code><br>
-        Authorized Redirect URI: <code>http://localhost:8000/callback</code><br>
-        Copy the <strong>Client ID</strong> and <strong>Client Secret</strong>.</p>
-        <p style="margin-top:.5rem">Outside India? Use <a href="https://api-console.zoho.com" target="_blank">api-console.zoho.com</a> instead.</p>
-      </div>
-    </div>
-    <div class="step-item">
-      <div class="step-num">2</div>
-      <div class="step-body">
-        <h4>Create a <code>.env</code> File</h4>
-        <p>In the <code>ai-agent/</code> folder, create a file named <code>.env</code> and paste:</p>
-        <pre><code>ZOHO_CLIENT_ID=your_client_id_here
-ZOHO_CLIENT_SECRET=your_client_secret_here
-ZOHO_REDIRECT_URI=http://localhost:8000/callback</code></pre>
-      </div>
-    </div>
-    <div class="step-item">
-      <div class="step-num">3</div>
-      <div class="step-body">
         <h4>Run the Installer</h4>
         <p>Double-click <code>installer\install.bat</code>. It installs Python dependencies and registers the agent with Claude Desktop automatically.</p>
       </div>
     </div>
     <div class="step-item">
-      <div class="step-num">4</div>
+      <div class="step-num">2</div>
       <div class="step-body">
         <h4>Restart Claude Desktop</h4>
-        <p>Fully quit Claude Desktop from the system tray (not just close the window), then reopen it. The agent's 66 tools will appear automatically.</p>
+        <p>Fully quit Claude Desktop from the system tray (not just close the window), then reopen it. The agent's tools will appear automatically.</p>
       </div>
     </div>
     <div class="step-item">
-      <div class="step-num">5</div>
+      <div class="step-num">3</div>
       <div class="step-body">
         <h4>Authenticate with Zoho</h4>
         <p>In Claude Desktop, type: <code>Authenticate with Zoho Books</code>. A browser window opens — log in and click Accept. Done. You only authenticate once; tokens refresh automatically.</p>
