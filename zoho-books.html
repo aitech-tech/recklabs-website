@@ -141,7 +141,7 @@
 <div class="hero">
   <div class="badge">Available — v1.2.0 · Direct API</div>
   <h1>📚 <span>Zoho Books</span> Connector</h1>
-  <p>51 tools. 12 built-in skills. Indian GST defaults. Query and manage your Zoho Books data from Claude Desktop using plain language.</p>
+  <p>51 raw tools. 40 Python pre-processing report scripts. 12 built-in skills. Indian GST defaults. Query, summarize, and manage Zoho Books from Claude Desktop using plain language.</p>
   <a href="index.html#download" class="btn btn-primary">Download Free</a>
   <a href="#setup" class="btn btn-secondary">Setup Guide</a>
 </div>
@@ -159,6 +159,7 @@
     <li><a href="#auth">Authentication</a></li>
     <li class="group-label">Capabilities</li>
     <li><a href="#tools">All 51 Tools</a></li>
+    <li><a href="#python-scripts">Python Report Scripts</a></li>
     <li><a href="#skills">Built-in Skills</a></li>
     <li><a href="#custom-skills">Custom Word Skills</a></li>
     <li><a href="#prompts">Example Prompts</a></li>
@@ -225,7 +226,104 @@
       <p>Record payments received. Manage GST and TDS tax rates. Indian defaults: 18% GST, 10% TDS.</p>
     </div>
   </div>
-  <p>All 51 tools run directly against the Zoho Books REST API v3 (India endpoint: <code>zohoapis.in/books/v3</code>). No third-party intermediaries. Your data stays between Claude Desktop (on your machine) and Zoho's servers.</p>
+  <p>All 51 raw tools run directly against the Zoho Books REST API v3 (India endpoint: <code>zohoapis.in/books/v3</code>). The 40 <code>zb_*</code> Python report scripts run locally on your machine, process records near the data, and return compact summaries to Claude. No third-party intermediaries.</p>
+</section>
+
+<!-- PYTHON PRE-PROCESSING SCRIPTS -->
+<section id="python-scripts">
+  <h2>Python Pre-Processing Report Scripts</h2>
+  <p>The Zoho Books build now includes a local report library under <code>products/zoho_books/</code>. These scripts are different from the raw <code>zoho_books_*</code> API tools: they fetch records locally, filter and aggregate in Python, and return narrative-ready summaries so Claude does not need to consume hundreds of raw JSON records.</p>
+
+  <div class="callout callout-info">
+    <strong>How they load:</strong> <code>products/script_loader.py</code> discovers every implemented Python file in <code>products/zoho_books/</code>, validates the script interface, wraps it safely, and registers it as an MCP tool named <code>zb_*</code> when the agent starts.
+  </div>
+
+  <h3>Why This Matters</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Raw Zoho Books tools</th><th>Python report scripts</th></tr>
+    <tr><td>Return full Zoho API JSON payloads</td><td>Return compact summaries only</td></tr>
+    <tr><td>Best for create, update, delete, drilldown, and exact records</td><td>Best for reporting, analysis, dashboards, and management summaries</td></tr>
+    <tr><td>Claude receives many record fields</td><td>Claude receives totals, buckets, rankings, warnings, and narrative cues</td></tr>
+    <tr><td>Higher context usage for large datasets</td><td>Lower token cost because aggregation happens locally in Python</td></tr>
+  </table></div>
+
+  <h3>Script Contract</h3>
+  <ul>
+    <li>Each script exposes <code>TOOL_NAME</code>, <code>TOOL_DESCRIPTION</code>, <code>TOOL_PARAMS</code>, and <code>run(params)</code>.</li>
+    <li>Tool names must start with <code>zb_</code>, for example <code>zb_ar_aging</code>.</li>
+    <li>Scripts use shared helpers from <code>products/zoho_books/_base.py</code> for date ranges, INR formatting, currency grouping, top records, and safe field extraction.</li>
+    <li>Successful responses include <code>success</code>, <code>report</code>, <code>currency</code>, <code>records_processed</code>, <code>records_returned</code>, <code>raw_data_returned: false</code>, and <code>narrative_cue</code>.</li>
+    <li>Arrays are capped to protect Claude's context window: top records and groups are capped at 10 items, with a 50-item documented exception for price lists.</li>
+    <li>Financial, GST, TDS, and balance-sheet style scripts include estimate/accuracy notes and require accountant/statutory validation before filings.</li>
+  </ul>
+
+  <h3>Available Reports By Category</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Category</th><th>Scripts</th><th>Purpose</th></tr>
+    <tr><td>Receivables</td><td>3</td><td>Customer balances, AR aging, overdue invoices</td></tr>
+    <tr><td>Invoices</td><td>8</td><td>Invoice summary, outstanding invoices, payments, revenue trends, recurring and draft invoices</td></tr>
+    <tr><td>Payables</td><td>7</td><td>Vendor balances, AP aging, open/overdue bills, purchase orders, vendor payments and spend</td></tr>
+    <tr><td>Financial Statements</td><td>5</td><td>Estimated P&amp;L, balance sheet, cash flow, trial balance, and financial overview</td></tr>
+    <tr><td>Sales</td><td>4</td><td>Sales summary, sales orders, estimates, and sales by item</td></tr>
+    <tr><td>Expenses</td><td>3</td><td>Expense summaries by category and vendor</td></tr>
+    <tr><td>Cash &amp; Banking</td><td>2</td><td>Cash position and bank account balances</td></tr>
+    <tr><td>Tax</td><td>3</td><td>GST summary, tax liability, and TDS summary</td></tr>
+    <tr><td>Inventory</td><td>3</td><td>Inventory value, top-selling items, and price list</td></tr>
+    <tr><td>Contacts</td><td>2</td><td>Contact list and contact aging</td></tr>
+  </table></div>
+
+  <h3>Full Script Catalog</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>MCP Tool</th><th>Python Script</th><th>Category</th><th>Description</th></tr>
+    <tr><td><code>zb_customer_balances</code></td><td><code>customer_balances.py</code></td><td>Receivables</td><td>Outstanding receivable balances per customer, top debtors, missing email count.</td></tr>
+    <tr><td><code>zb_ar_aging</code></td><td><code>ar_aging.py</code></td><td>Receivables</td><td>AR aging buckets: current, 0-30, 31-60, 61-90, and 90+ days, plus total outstanding and top invoices.</td></tr>
+    <tr><td><code>zb_overdue_invoices</code></td><td><code>overdue_invoices.py</code></td><td>Receivables</td><td>All overdue invoices with total, average days overdue, oldest invoice, and top customers.</td></tr>
+    <tr><td><code>zb_invoice_summary</code></td><td><code>invoice_summary.py</code></td><td>Invoices</td><td>Invoice status breakdown by period: total value, paid amount, outstanding amount, and collection rate.</td></tr>
+    <tr><td><code>zb_expense_by_category</code></td><td><code>expense_by_category.py</code></td><td>Expenses</td><td>Expenses grouped by account or category for a period, with total and top categories.</td></tr>
+    <tr><td><code>zb_vendor_balances</code></td><td><code>vendor_balances.py</code></td><td>Payables</td><td>Outstanding payable balances per vendor.</td></tr>
+    <tr><td><code>zb_contact_list</code></td><td><code>contact_list.py</code></td><td>Contacts</td><td>Summarised contact list with type, email, and balance.</td></tr>
+    <tr><td><code>zb_contact_aging</code></td><td><code>contact_aging.py</code></td><td>Contacts</td><td>Combined AR/AP aging per contact.</td></tr>
+    <tr><td><code>zb_outstanding_invoices</code></td><td><code>outstanding_invoices.py</code></td><td>Invoices</td><td>All open unpaid or sent invoices with totals and top customers.</td></tr>
+    <tr><td><code>zb_payments_received</code></td><td><code>payments_received.py</code></td><td>Invoices</td><td>Customer payments received in a period, grouped by payment mode.</td></tr>
+    <tr><td><code>zb_revenue_by_month</code></td><td><code>revenue_by_month.py</code></td><td>Invoices</td><td>Monthly revenue trend from invoices for the current or previous year.</td></tr>
+    <tr><td><code>zb_top_customers_revenue</code></td><td><code>top_customers_revenue.py</code></td><td>Invoices</td><td>Top customers by total invoiced revenue for a period.</td></tr>
+    <tr><td><code>zb_recurring_invoices</code></td><td><code>recurring_invoices.py</code></td><td>Invoices</td><td>Summary of recurring invoice profiles and monthly commitment.</td></tr>
+    <tr><td><code>zb_draft_invoices</code></td><td><code>draft_invoices.py</code></td><td>Invoices</td><td>Count and total value of draft invoices pending dispatch.</td></tr>
+    <tr><td><code>zb_ap_aging</code></td><td><code>ap_aging.py</code></td><td>Payables</td><td>AP aging buckets from bills, total payable, and critical overdue amounts.</td></tr>
+    <tr><td><code>zb_outstanding_bills</code></td><td><code>outstanding_bills.py</code></td><td>Payables</td><td>All open bills with totals and top vendors.</td></tr>
+    <tr><td><code>zb_overdue_bills</code></td><td><code>overdue_bills.py</code></td><td>Payables</td><td>Overdue bills with average days overdue and oldest bill.</td></tr>
+    <tr><td><code>zb_bills_by_vendor</code></td><td><code>bills_by_vendor.py</code></td><td>Payables</td><td>Bills grouped by vendor with totals for a period.</td></tr>
+    <tr><td><code>zb_purchase_orders_summary</code></td><td><code>purchase_orders_summary.py</code></td><td>Payables</td><td>Purchase order status breakdown and total committed value.</td></tr>
+    <tr><td><code>zb_vendor_payments</code></td><td><code>vendor_payments.py</code></td><td>Payables</td><td>Vendor payments made in a period, grouped by vendor.</td></tr>
+    <tr><td><code>zb_top_vendors_spend</code></td><td><code>top_vendors_spend.py</code></td><td>Payables</td><td>Top vendors by total billed spend for a period.</td></tr>
+    <tr><td><code>zb_profit_loss</code></td><td><code>profit_loss.py</code></td><td>Financial Statements</td><td>Estimated profit and loss from invoices and expenses; requires statutory validation before filing.</td></tr>
+    <tr><td><code>zb_balance_sheet</code></td><td><code>balance_sheet.py</code></td><td>Financial Statements</td><td>Estimated balance sheet summary; requires statutory validation before filing.</td></tr>
+    <tr><td><code>zb_cash_flow</code></td><td><code>cash_flow.py</code></td><td>Financial Statements</td><td>Estimated cash flow from payments received and vendor payments; requires validation.</td></tr>
+    <tr><td><code>zb_trial_balance</code></td><td><code>trial_balance.py</code></td><td>Financial Statements</td><td>Trial balance summary by account; requires statutory validation.</td></tr>
+    <tr><td><code>zb_financial_overview</code></td><td><code>financial_overview.py</code></td><td>Financial Statements</td><td>One-page financial overview: revenue, expenses, AR, AP, and cash position.</td></tr>
+    <tr><td><code>zb_sales_summary</code></td><td><code>sales_summary.py</code></td><td>Sales</td><td>Sales summary from invoices for a period: count, total, and average.</td></tr>
+    <tr><td><code>zb_sales_orders_summary</code></td><td><code>sales_orders_summary.py</code></td><td>Sales</td><td>Sales order status breakdown and total order value.</td></tr>
+    <tr><td><code>zb_estimates_summary</code></td><td><code>estimates_summary.py</code></td><td>Sales</td><td>Estimates by status with conversion rate.</td></tr>
+    <tr><td><code>zb_sales_by_item</code></td><td><code>sales_by_item.py</code></td><td>Sales</td><td>Revenue grouped by item or service for a period.</td></tr>
+    <tr><td><code>zb_expense_summary</code></td><td><code>expense_summary.py</code></td><td>Expenses</td><td>Total expense summary for a period with status breakdown.</td></tr>
+    <tr><td><code>zb_top_vendors_expense</code></td><td><code>top_vendors_expense.py</code></td><td>Expenses</td><td>Top vendors by expense amount for a period.</td></tr>
+    <tr><td><code>zb_cash_position</code></td><td><code>cash_position.py</code></td><td>Cash &amp; Banking</td><td>Current cash position across bank accounts.</td></tr>
+    <tr><td><code>zb_bank_accounts</code></td><td><code>bank_accounts.py</code></td><td>Cash &amp; Banking</td><td>Summary of bank accounts with current balances.</td></tr>
+    <tr><td><code>zb_gst_summary</code></td><td><code>gst_summary.py</code></td><td>Tax</td><td>GST collected and input credit summary for a period; requires statutory validation.</td></tr>
+    <tr><td><code>zb_tax_liability</code></td><td><code>tax_liability.py</code></td><td>Tax</td><td>Estimated tax liability summary; requires statutory validation before filing.</td></tr>
+    <tr><td><code>zb_tds_summary</code></td><td><code>tds_summary.py</code></td><td>Tax</td><td>TDS deducted and collected summary; requires statutory validation.</td></tr>
+    <tr><td><code>zb_inventory_summary</code></td><td><code>inventory_summary.py</code></td><td>Inventory</td><td>Inventory items summary with stock value and top items by value.</td></tr>
+    <tr><td><code>zb_top_selling_items</code></td><td><code>top_selling_items.py</code></td><td>Inventory</td><td>Top-selling items by quantity and revenue for a period.</td></tr>
+    <tr><td><code>zb_item_price_list</code></td><td><code>item_price_list.py</code></td><td>Inventory</td><td>Item and service price list, capped at 50 items.</td></tr>
+  </table></div>
+
+  <h3>Example Report Prompts</h3>
+  <div class="card-grid">
+    <div class="card"><h4>Receivables</h4><p><code>Show AR aging</code><br><code>Show overdue invoices by customer</code><br><code>List customer balances</code></p></div>
+    <div class="card"><h4>Payables</h4><p><code>Show AP aging</code><br><code>Summarize overdue bills</code><br><code>Who are my top vendors by spend?</code></p></div>
+    <div class="card"><h4>Financials</h4><p><code>Show financial overview</code><br><code>Estimate profit and loss this month</code><br><code>Show cash flow</code></p></div>
+    <div class="card"><h4>Tax &amp; Inventory</h4><p><code>Show GST summary</code><br><code>Estimate tax liability</code><br><code>Show inventory summary</code></p></div>
+  </div>
 </section>
 
 <!-- SETUP -->
